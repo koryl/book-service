@@ -1,21 +1,31 @@
 package koryl.library.books.infrastructure.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import koryl.library.books.infrastructure.exception.GeneralException
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import kotlin.reflect.KClass
 
 interface Mapping
 
-val objectMapper: ObjectMapper = Mapper.provideObjectMapper()
-
-inline fun <reified T : Mapping, R> T.mapping(obj: Any, type: Class<R>): R = objectMapper.convertValue(obj, type)
+inline fun <reified T : Mapping, R : Any> T.mapping(obj: Any, type: KClass<R>): R = Mapper.convertValue(obj, type)
 
 @Component
 class Mapper {
     companion object {
+        private val logger = getLogger(Mapper::class.java)
         private lateinit var objectMapper: ObjectMapper
 
-        fun provideObjectMapper() = this.objectMapper
+        fun <R : Any> convertValue(obj: Any, type: KClass<R>): R {
+            try {
+                return objectMapper.convertValue(obj, type.java)
+
+            } catch (ex: Exception) {
+                logger.error("Cannot convert value!", ex)
+                throw GeneralException("Cannot convert value!")
+            }
+        }
     }
 
     @Autowired

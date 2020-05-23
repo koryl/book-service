@@ -12,6 +12,8 @@ interface BookRepository {
 
     fun saveBook(book: Book): Book
 
+    fun updateBook(book: Book): Book
+
     fun removeBookByGuid(guid: String)
 
 }

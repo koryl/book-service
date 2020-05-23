@@ -1,5 +1,7 @@
 package koryl.library.books.application.presentation.request
 
+import java.io.Serializable
+
 data class SaveBookRequest(
         var title: String,
         var author: String,
@@ -9,4 +11,4 @@ data class SaveBookRequest(
         var pages: Int,
         var publicationDate: String,
         var publisher: String
-)
+) : Serializable

@@ -12,5 +12,6 @@ data class Book(
         var language: String,
         var pages: Int,
         var publisher: String,
-        var publicationDate: LocalDate
+        var publicationDate: LocalDate,
+        var status: BookStatus?
 ) : Serializable

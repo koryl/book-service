@@ -9,5 +9,6 @@ data class BookDto(
         var language: String,
         var pages: Int,
         var publicationDate: String,
-        var publisher: String
+        var publisher: String,
+        var status: String
 )

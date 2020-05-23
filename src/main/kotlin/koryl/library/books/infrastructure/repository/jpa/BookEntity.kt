@@ -1,12 +1,12 @@
 package koryl.library.books.infrastructure.repository.jpa
 
 import koryl.library.books.domain.Book
+import koryl.library.books.domain.BookStatus
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
 import java.io.Serializable
 import java.time.LocalDate
 import javax.persistence.*
-
 
 @Entity
 @Indexed
@@ -50,8 +50,12 @@ data class BookEntity(
         @Column(name = PUBLICATION_DATE, nullable = false)
         val publicationDate: LocalDate,
 
+        @Column(name = STATUS, nullable = false)
+        val status: String,
+
         @Version
         val version: Int
 ) : Serializable
 
-fun BookEntity.toBook() = Book(guid, title, author, description, isbn, language, pages, publisher, publicationDate)
+fun BookEntity.toBook() = Book(guid, title, author, description, isbn, language, pages, publisher, publicationDate, BookStatus.valueOf(status))
+

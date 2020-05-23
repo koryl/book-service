@@ -1,5 +1,7 @@
 package koryl.library.books.application.presentation.response
 
+import java.io.Serializable
+
 data class GetBookResponse(
         var guid: String,
         var title: String,
@@ -9,4 +11,4 @@ data class GetBookResponse(
         var pages: Int,
         var publicationDate: String,
         var publisher: String
-)
+) : Serializable

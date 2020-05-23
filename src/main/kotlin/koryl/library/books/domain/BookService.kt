@@ -30,4 +30,11 @@ class BookService(private val bookRepository: BookRepository) : Logging {
     fun removeBook(guid: String) {
         bookRepository.removeBookByGuid(guid)
     }
+
+    fun borrowBook(guid: String, userId: String) {
+        val book = bookRepository.findBookByGuid(guid)
+        val borrow = Borrow(book, userId)
+        borrow.borrowBook()
+        bookRepository.updateBook(borrow.book)
+    }
 }
