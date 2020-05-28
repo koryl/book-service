@@ -1,26 +1,22 @@
 package koryl.library.books.infrastructure.repository.jpa
 
 import koryl.library.books.domain.Book
+import koryl.library.books.domain.BookPage
 import koryl.library.books.domain.BookStatus
 import org.hibernate.search.annotations.Field
 import org.hibernate.search.annotations.Indexed
+import org.springframework.data.domain.Page
 import java.io.Serializable
 import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
 @Indexed
-@Table(name = BOOK,
-        indexes = [
-            Index(name = GUID_INDEX, columnList = GUID, unique = true)
-        ])
+@Table(name = BOOKS)
 data class BookEntity(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Long,
-
-        @Column(name = GUID, nullable = false, unique = true)
-        val guid: String,
+        val id: Long?,
 
         @Field
         @Column(name = TITLE, nullable = false)
@@ -51,11 +47,46 @@ data class BookEntity(
         val publicationDate: LocalDate,
 
         @Column(name = STATUS, nullable = false)
-        val status: String,
+        val status: BookStatus?,
 
         @Version
-        val version: Int
+        val version: Int?
 ) : Serializable
 
-fun BookEntity.toBook() = Book(guid, title, author, description, isbn, language, pages, publisher, publicationDate, BookStatus.valueOf(status))
+internal fun BookEntity.toDomain() =
+        Book(
+                id,
+                title,
+                author,
+                description,
+                isbn,
+                language,
+                pages,
+                publisher,
+                publicationDate,
+                status,
+                version
+        )
 
+internal fun Book.toJpaEntity() =
+        BookEntity(
+                id,
+                title,
+                author,
+                description,
+                isbn,
+                language,
+                pages,
+                publisher,
+                publicationDate,
+                status,
+                version
+        )
+
+internal fun toBookPage(page: Page<BookEntity>): BookPage {
+        return BookPage(
+                page.content.map { it.toDomain() },
+                page.totalPages,
+                page.totalElements
+        )
+}

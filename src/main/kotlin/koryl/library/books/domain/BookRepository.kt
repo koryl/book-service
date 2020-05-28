@@ -4,7 +4,7 @@ import org.springframework.data.domain.Pageable
 
 interface BookRepository {
 
-    fun findBookByGuid(guid: String): Book
+    fun findBookById(id: Long): Book
 
     fun findAllBooksByCriteria(title: String?, author: String?, isbn: String?, pageable: Pageable): BookPage
 
@@ -12,8 +12,10 @@ interface BookRepository {
 
     fun saveBook(book: Book): Book
 
-    fun updateBook(book: Book): Book
+    fun removeBookById(id: Long)
 
-    fun removeBookByGuid(guid: String)
+    fun saveBorrowedOrder(borrowedOrder: BorrowedOrder): BorrowedOrder
+
+    fun findOrder(userId: String, orderGuid: String): BorrowedOrder
 
 }

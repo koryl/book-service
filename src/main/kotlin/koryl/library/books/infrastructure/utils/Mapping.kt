@@ -1,6 +1,9 @@
 package koryl.library.books.infrastructure.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import koryl.library.books.application.presentation.request.SaveBookRequest
+import koryl.library.books.domain.Book
+import koryl.library.books.domain.BookStatus
 import koryl.library.books.infrastructure.exception.GeneralException
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,4 +35,19 @@ class Mapper {
     protected fun setObjectMapper(objectMapper: ObjectMapper) {
         Mapper.objectMapper = objectMapper
     }
+}
+
+fun fromSaveRequestToBook(request: SaveBookRequest): Book {
+    return Book(null,
+            request.title,
+            request.author,
+            request.description,
+            request.isbn,
+            request.language,
+            request.pages,
+            request.publisher,
+            request.publicationDate,
+            BookStatus.AVAILABLE,
+            null
+    )
 }

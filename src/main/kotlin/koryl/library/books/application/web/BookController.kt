@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/book")
 class BookController(private val bookFacade: BookFacade) {
 
-    @GetMapping("/{guid}")
-    fun getBookByGuid(@PathVariable guid: String) = bookFacade.findBookByGuid(guid)
+    @GetMapping("/{id}")
+    fun getBookById(@PathVariable id: Long) = bookFacade.findBookById(id)
 
     @GetMapping("/find")
     fun findBooks(request: FindBookRequest, page: Pageable) = bookFacade.findBooks(request, page)
@@ -22,7 +22,7 @@ class BookController(private val bookFacade: BookFacade) {
     @PostMapping
     fun saveBook(@RequestBody request: SaveBookRequest) = bookFacade.saveBook(request)
 
-    @DeleteMapping("/{guid}")
-    fun removeBookByGuid(@PathVariable guid: String) = bookFacade.removeBook(guid)
+    @DeleteMapping("/{id}")
+    fun removeBookById(@PathVariable id: Long) = bookFacade.removeBook(id)
 
 }

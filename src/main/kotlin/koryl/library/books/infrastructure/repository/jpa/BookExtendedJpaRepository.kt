@@ -3,52 +3,52 @@ package koryl.library.books.infrastructure.repository.jpa
 import koryl.library.books.domain.Book
 import koryl.library.books.domain.BookPage
 import koryl.library.books.domain.BookRepository
+import koryl.library.books.domain.BorrowedOrder
 import koryl.library.books.infrastructure.exception.GeneralException
 import koryl.library.books.infrastructure.utils.Logging
-import koryl.library.books.infrastructure.utils.Mapping
 import koryl.library.books.infrastructure.utils.logger
-import koryl.library.books.infrastructure.utils.mapping
 import org.apache.lucene.search.Query
 import org.hibernate.search.jpa.FullTextEntityManager
-import org.hibernate.search.jpa.FullTextQuery
 import org.hibernate.search.jpa.Search
 import org.hibernate.search.query.dsl.QueryBuilder
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import javax.persistence.EntityManager
 
 @Repository
-class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaRepository,
-                                private val entityManager: EntityManager)
-    : BookRepository, Logging, Mapping {
+internal class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaRepository,
+                                         private val borrowedOrderJpaRepository: BorrowedOrderJpaRepository,
+                                         private val entityManager: EntityManager)
+    : BookRepository, Logging {
 
 
-    override fun findBookByGuid(guid: String): Book {
-        logger().info("Finding book by guid {} in database...", guid)
-        val bookOp = handle { bookJpaRepository.findByGuid(guid) }
-        val bookEntity = bookOp.orElseThrow { throw GeneralException("Cannot find book for guid!") }
+    override fun findBookById(id: Long): Book {
+        logger().info("Finding book by id {} in database...", id)
+        val bookOp = handle { bookJpaRepository.findById(id) }
+        val bookEntity = bookOp.orElseThrow { throw GeneralException("Cannot find book for id!") }
         logger().info("Finished finding book in database")
-        return mapping(bookEntity, Book::class)
+        return bookEntity.toDomain()
     }
 
     override fun findAllBooksByCriteria(title: String?, author: String?, isbn: String?, pageable: Pageable): BookPage {
         logger().info("Finding books by criteria in database...")
-        val bookPage = handle { bookJpaRepository.findAllByCriteria(title, author, isbn, pageable) }
-        logger().info("It was found {} books", bookPage.content.size)
+        val resultPage = handle { bookJpaRepository.findAllByCriteria(title, author, isbn, pageable) }
+        logger().info("It was found {} books", resultPage.content.size)
 
-        return mapping(bookPage, BookPage::class)
+        return toBookPage(resultPage)
     }
 
     override fun searchBooksByText(searchText: String, pageable: Pageable): BookPage {
         logger().info("Searching books by text in database...")
-        val bookPage = handle { searchBooks(searchText, pageable) }
-        logger().info("It was found {} books", bookPage.content.size)
+        val resultPage = handle { searchBooks(searchText, pageable) }
+        logger().info("It was found {} books", resultPage.content.size)
 
-        return mapping(bookPage, BookPage::class)
+        return toBookPage(resultPage)
     }
 
-    private fun searchBooks(searchText: String, pageable: Pageable): BookPage {
+    private fun searchBooks(searchText: String, pageable: Pageable): Page<BookEntity> {
         val fullTextEntityManager = Search.getFullTextEntityManager(entityManager)
         val luceneQuery = getQueryBuilder(fullTextEntityManager)
                 .keyword()
@@ -56,9 +56,8 @@ class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaRepository
                 .matching(searchText)
                 .createQuery()
 
-        val result = getJpaQuery(luceneQuery, fullTextEntityManager, pageable).resultList
-        val pageResult = PageImpl(result, pageable, result.size.toLong())
-        return mapping(pageResult, BookPage::class)
+        val result = getJpaQuery(luceneQuery, fullTextEntityManager, pageable)
+        return PageImpl(result, pageable, result.size.toLong())
     }
 
 
@@ -69,35 +68,46 @@ class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaRepository
                 .get()
     }
 
-    private fun getJpaQuery(luceneQuery: Query, fullTextEntityManager: FullTextEntityManager, pageable: Pageable): FullTextQuery {
+    @Suppress("UNCHECKED_CAST")
+    private fun getJpaQuery(luceneQuery: Query, fullTextEntityManager: FullTextEntityManager, pageable: Pageable): List<BookEntity> {
         return fullTextEntityManager.createFullTextQuery(luceneQuery, BookEntity::class.java)
                 .setFirstResult(pageable.pageSize * pageable.pageNumber)
                 .setMaxResults(pageable.pageSize)
+                .resultList as List<BookEntity>
     }
 
-    override fun removeBookByGuid(guid: String) {
-        logger().info("Removing book by guid {}...", guid)
-        handle { bookJpaRepository.removeByGuid(guid) }
-        logger().info("Book with guid {} was successfully removed", guid)
+    override fun removeBookById(id: Long) {
+        logger().info("Removing book by id {}...", id)
+        handle { bookJpaRepository.deleteById(id) }
+        logger().info("Book with id {} was successfully removed", id)
     }
 
     override fun saveBook(book: Book): Book {
-        val bookEntity = mapping(book, BookEntity::class)
+        val bookEntity = book.toJpaEntity()
 
         logger().info("Saving new book...")
         val savedBook = handle { bookJpaRepository.save(bookEntity) }
         logger().info("Book was saved successfully!")
 
-        return mapping(savedBook, Book::class)
+        return savedBook.toDomain()
     }
 
-    override fun updateBook(book: Book): Book {
-        val bookEntity = mapping(book, BookEntity::class)
+    override fun saveBorrowedOrder(borrowedOrder: BorrowedOrder): BorrowedOrder {
+        val borrowedOrderEntity = borrowedOrder.toJpaEntity()
+
         logger().info("Saving new book...")
-        val savedBook = handle { bookJpaRepository.save(bookEntity) }
+        val savedOrder = handle { borrowedOrderJpaRepository.save(borrowedOrderEntity) }
         logger().info("Book was saved successfully!")
 
-        return mapping(savedBook, Book::class)
+        return savedOrder.toDomain()
+    }
+
+    override fun findOrder(userId: String, orderGuid: String): BorrowedOrder {
+        logger().info("Saving new book...")
+        val order = handle { borrowedOrderJpaRepository.findByUserIdAndGuid(userId, orderGuid) }
+        logger().info("Book was saved successfully!")
+
+        return order.toDomain()
     }
 
     private fun <T> handle(func: () -> T): T {
