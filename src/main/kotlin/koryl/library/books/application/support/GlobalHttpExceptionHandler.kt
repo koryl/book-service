@@ -13,7 +13,7 @@ class GlobalHttpExceptionHandler : Logging {
 
     @ExceptionHandler(Exception::class)
     fun handleExceptions(ex: Exception): ResponseEntity<ExceptionModel> {
-        logger().warn("Handling error...")
+        logger().warn("Handling error...", ex)
         val model = ExceptionModel("ERROR", ex.message.orEmpty())
         return ResponseEntity(model, HttpStatus.INTERNAL_SERVER_ERROR)
     }

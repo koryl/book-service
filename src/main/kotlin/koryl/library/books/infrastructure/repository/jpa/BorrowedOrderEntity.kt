@@ -10,7 +10,7 @@ import javax.persistence.*
 
 @Entity
 @Indexed
-@Table(name = BOOKS)
+@Table(name = ORDERS)
 data class BorrowedOrderEntity(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

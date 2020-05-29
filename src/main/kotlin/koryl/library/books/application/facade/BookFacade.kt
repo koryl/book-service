@@ -18,19 +18,19 @@ class BookFacade(private val bookService: BookService) {
     @Transactional(readOnly = true)
     fun findBookById(id: Long): GetBookResponse {
         val book = bookService.getBookById(id)
-        return GetBookResponse(book)
+        return fromBookToGetBookResponse(book)
     }
 
     @Transactional(readOnly = true)
     fun findBooks(request: FindBookRequest, pageable: Pageable): FindBookResponse {
         val bookPage = bookService.findBooks(request.title, request.author, request.isbn, pageable)
-        return FindBookResponse(bookPage)
+        return fromBookPageToFindBookResponse(bookPage)
     }
 
     @Transactional(readOnly = true)
     fun searchBooks(searchText: String, pageable: Pageable): FindBookResponse {
         val bookPage = bookService.searchBooks(searchText, pageable)
-        return FindBookResponse(bookPage)
+        return fromBookPageToFindBookResponse(bookPage)
     }
 
     @Transactional

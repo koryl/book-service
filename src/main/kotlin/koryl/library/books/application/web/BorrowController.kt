@@ -4,7 +4,7 @@ import koryl.library.books.application.facade.BookFacade
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/book/order")
 class BorrowController(private val bookFacade: BookFacade) {
 
     @GetMapping("/borrow")

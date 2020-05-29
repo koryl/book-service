@@ -11,5 +11,5 @@ const val STATUS = "status"
 const val LANGUAGE = "language"
 const val PAGES = "pages"
 
-const val BORROW_ORDERS = "borrow_orders"
+const val ORDERS = "orders"
 
