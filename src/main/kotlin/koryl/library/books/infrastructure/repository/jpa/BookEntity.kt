@@ -15,7 +15,7 @@ import javax.persistence.*
 @Table(name = BOOKS)
 data class BookEntity(
         @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
         val id: Long?,
 
         @Field

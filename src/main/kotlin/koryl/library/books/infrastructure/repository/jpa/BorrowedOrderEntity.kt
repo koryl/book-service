@@ -1,6 +1,5 @@
 package koryl.library.books.infrastructure.repository.jpa
 
-import koryl.library.books.domain.Book
 import koryl.library.books.domain.BorrowedOrder
 import koryl.library.books.domain.BorrowedOrderStatus
 import org.hibernate.search.annotations.Indexed
@@ -13,14 +12,29 @@ import javax.persistence.*
 @Table(name = ORDERS)
 data class BorrowedOrderEntity(
         @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
         val id: Long?,
+
+        @Column(name = ORDER_GUID, nullable = false, unique = true)
         val guid: String,
-        val book: Book,
+
+        @OneToOne
+        @JoinColumn(name = BOOK_ID, nullable = false)
+        val book: BookEntity,
+
+        @Column(name = USER_ID, nullable = false)
         val userId: String,
+
+        @Column(name = BORROWING_DATE, nullable = false)
         val borrowingDate: LocalDateTime,
+
+        @Column(name = ESTIMATED_RETURN_DATE, nullable = false)
         val estimatedReturnDate: LocalDateTime,
+
+        @Column(name = ACTUAL_RETURN_DATE, nullable = true)
         val actualReturnDate: LocalDateTime?,
+
+        @Column(name = ORDER_STATUS, nullable = false)
         val status: BorrowedOrderStatus
 
 ) : Serializable
@@ -30,7 +44,7 @@ internal fun BorrowedOrder.toJpaEntity() =
         BorrowedOrderEntity(
                 id,
                 guid,
-                book,
+                book.toJpaEntity(),
                 userId,
                 borrowingDate,
                 estimatedReturnDate,
@@ -42,7 +56,7 @@ internal fun BorrowedOrderEntity.toDomain() =
         BorrowedOrder(
                 id,
                 guid,
-                book,
+                book.toDomain(),
                 userId,
                 borrowingDate,
                 estimatedReturnDate,

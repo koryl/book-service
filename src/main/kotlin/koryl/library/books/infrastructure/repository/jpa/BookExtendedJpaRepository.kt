@@ -20,14 +20,14 @@ import javax.persistence.EntityManager
 @Repository
 internal class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaRepository,
                                          private val borrowedOrderJpaRepository: BorrowedOrderJpaRepository,
-                                         private val entityManager: EntityManager)
-    : BookRepository, Logging {
-
+                                         private val entityManager: EntityManager) : BookRepository, Logging {
 
     override fun findBookById(id: Long): Book {
         logger().info("Finding book by id {} in database...", id)
-        val bookOp = handle { bookJpaRepository.findById(id) }
-        val bookEntity = bookOp.orElseThrow { throw GeneralException("Cannot find book for id!") }
+        val bookEntity = handle {
+            bookJpaRepository.findById(id)
+                    .orElseThrow { throw GeneralException("Cannot find book for id!") }
+        }
         logger().info("Finished finding book in database")
         return bookEntity.toDomain()
     }
@@ -59,7 +59,6 @@ internal class BookExtendedJpaRepository(private val bookJpaRepository: BookJpaR
         val result = getJpaQuery(luceneQuery, fullTextEntityManager, pageable)
         return PageImpl(result, pageable, result.size.toLong())
     }
-
 
     private fun getQueryBuilder(fullTextEntityManager: FullTextEntityManager): QueryBuilder {
         return fullTextEntityManager.searchFactory
