@@ -24,6 +24,8 @@ dependencies {
     implementation("org.hibernate:hibernate-search-orm:5.11.5.Final")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.springdoc:springdoc-openapi-ui:1.4.0")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.4.0")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
